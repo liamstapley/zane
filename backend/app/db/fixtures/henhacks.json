@@ -1,0 +1,34 @@
+{
+  "threads": [
+    {
+      "id": "northstar",
+      "sponsor": "Northstar Labs",
+      "subject": "HenHacks 2026 sponsorship",
+      "message": "We are interested in the Silver tier and would like to confirm the workshop perk before committing.",
+      "label": "Inbox"
+    },
+    {
+      "id": "riverbend",
+      "sponsor": "Riverbend Software",
+      "subject": "HenHacks sponsor logistics",
+      "message": "Our Bronze sponsorship is confirmed. Please share the logo upload deadline.",
+      "label": "Confirmed"
+    }
+  ],
+  "tracker": [
+    {
+      "id": "northstar",
+      "sponsor": "Northstar Labs",
+      "tier": "Silver",
+      "status": "Interested",
+      "perk": "Workshop discussion pending"
+    },
+    {
+      "id": "riverbend",
+      "sponsor": "Riverbend Software",
+      "tier": "Bronze",
+      "status": "Confirmed",
+      "perk": "Logo placement pending"
+    }
+  ]
+}

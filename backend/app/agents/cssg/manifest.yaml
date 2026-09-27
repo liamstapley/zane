@@ -1,0 +1,22 @@
+name: cssg
+description: CS+Social Good meetings, action items, project updates, and Discord check-in drafts.
+responsibilities:
+  - Prepare meeting minutes and agendas.
+  - Summarize action items and project progress.
+  - Draft Discord check-in messages.
+allowed_tools:
+  - read_previous_meeting_minutes
+  - read_project_updates
+  - read_action_items
+  - write_meeting_minutes
+  - create_discord_message_draft
+allowed_skills:
+  - meeting_minutes
+  - meeting_agenda
+  - action_item_tracking
+  - project_status_summary
+  - discord_checkin_draft
+memory_namespace: cssg
+prohibited_capabilities:
+  - Sending Discord messages.
+  - Access to HenHacks tools or memory.

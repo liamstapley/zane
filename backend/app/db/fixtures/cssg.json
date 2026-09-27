@@ -1,0 +1,37 @@
+{
+  "minutes": [
+    {
+      "id": "previous",
+      "title": "Previous team meeting",
+      "notes": "Reviewed volunteer onboarding and the accessibility audit schedule."
+    }
+  ],
+  "updates": [
+    {
+      "id": "accessibility",
+      "project": "Accessibility audit",
+      "status": "In progress",
+      "detail": "The team is reviewing keyboard navigation and color contrast."
+    },
+    {
+      "id": "volunteers",
+      "project": "Volunteer onboarding",
+      "status": "Planning",
+      "detail": "Orientation materials are ready for review."
+    }
+  ],
+  "actions": [
+    {
+      "id": "audit",
+      "owner": "Maya",
+      "task": "Collect audit findings",
+      "due": "Next team meeting"
+    },
+    {
+      "id": "orientation",
+      "owner": "Alex",
+      "task": "Review orientation slides",
+      "due": "Friday"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+name: orchestrator
+description: Routes a request to one specialist and reports its status.
+responsibilities:
+  - Interpret the user request and choose one domain.
+  - Track high-level status and return the domain result.
+allowed_tools: []
+allowed_skills: []
+memory_namespace: global
+prohibited_capabilities:
+  - Access to domain tools or domain memory.
+  - Direct side-effecting operations.

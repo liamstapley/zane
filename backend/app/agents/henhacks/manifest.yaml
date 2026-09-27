@@ -1,0 +1,23 @@
+name: henhacks
+description: HenHacks sponsorship email triage, follow-ups, tracker and perks.
+responsibilities:
+  - Review sponsorship correspondence.
+  - Draft sponsor responses and summarize sponsorship status.
+  - Track sponsor commitments and perks after approval.
+allowed_tools:
+  - search_sponsor_emails
+  - read_email_thread
+  - apply_henhacks_label
+  - read_sponsor_tracker
+  - update_sponsor_tracker
+  - create_email_draft_document
+allowed_skills:
+  - sponsor_email_triage
+  - sponsor_followup
+  - sponsor_response_drafting
+  - sponsorship_status_summary
+  - sponsor_perk_tracking
+memory_namespace: henhacks
+prohibited_capabilities:
+  - Sending email.
+  - Access to CS+Social Good tools or memory.
