@@ -1,14 +1,17 @@
 from collections.abc import Callable
 
 from app.memory.store import ScopedMemory
+from app.models.provider import ModelProvider
 from app.schemas.agent import AgentManifest
 from app.services.runtime import AgentResult, EventSink, MutationProposal, load_skill
+from app.services.prose import polish
 from app.tools.registry import BoundTools
 
 
 class HenHacksRuntime:
-    def __init__(self, manifest: AgentManifest):
+    def __init__(self, manifest: AgentManifest, provider: ModelProvider | None = None):
         self.manifest = manifest
+        self.provider = provider
 
     def run(
         self,
@@ -31,14 +34,15 @@ class HenHacksRuntime:
         else:
             return AgentResult("Which HenHacks task: triage, follow-up, draft, status summary, or perk tracking?", clarification=True)
 
-        load_skill(self.manifest, skill)
+        instructions = load_skill(self.manifest, skill)
         emit("henhacks", "skill_loaded", None, skill, "active", f"Loaded {skill} only.")
         tools = tools_for_skill(skill)
         if skill == "sponsorship_status_summary":
             tracker = tools.read("read_sponsor_tracker").data
             threads = tools.read("search_sponsor_emails", {"query": ""}).data
             summary = "; ".join(f"{item['sponsor']}: {item['status']} ({item['perk']})" for item in tracker)
-            return AgentResult(f"Sponsor tracker: {summary}. Reviewed {len(threads)} email threads.", skill)
+            draft = f"Sponsor tracker: {summary}. Reviewed {len(threads)} email threads."
+            return AgentResult(polish(self.provider, "henhacks", skill, instructions, summary, draft, emit), skill)
 
         if skill == "sponsor_perk_tracking":
             tracker = tools.read("read_sponsor_tracker").data
@@ -83,6 +87,7 @@ class HenHacksRuntime:
                 f"{thread['subject']}. We will review your question and follow up with "
                 "the relevant details.\n\nBest,\nHenHacks"
             )
+        content = polish(self.provider, "henhacks", skill, instructions, thread["message"], content, emit)
         args = tools.propose("create_email_draft_document", {"content": content})
         return AgentResult(
             f"Prepared an unsent sponsor draft for {thread['sponsor']}.",

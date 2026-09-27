@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Request
 
-from app.schemas.tasks import DecisionRequest, TaskRequest, TaskSnapshot
+from app.schemas.tasks import ClarificationRequest, DecisionRequest, TaskRequest, TaskSnapshot
 from app.services.tasks import InvalidDecision, TaskNotFound, TaskService
 
 
@@ -27,6 +27,16 @@ def get_task(task_id: str, request: Request) -> TaskSnapshot:
         return service(request).get(task_id)
     except TaskNotFound as error:
         raise HTTPException(404, "Task not found") from error
+
+
+@router.post("/tasks/{task_id}/clarify", response_model=TaskSnapshot)
+def clarify_task(task_id: str, body: ClarificationRequest, request: Request) -> TaskSnapshot:
+    try:
+        return service(request).clarify(task_id, body.answer)
+    except TaskNotFound as error:
+        raise HTTPException(404, "Task not found") from error
+    except InvalidDecision as error:
+        raise HTTPException(409, str(error)) from error
 
 
 @router.post("/tasks/{task_id}/decision", response_model=TaskSnapshot)

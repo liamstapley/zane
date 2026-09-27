@@ -1,8 +1,6 @@
-# Local development
+# Development and local demo
 
-Use Python 3.12 or later (3.12 is the production target). Create the isolated
-virtual environment at `backend/.venv`; do not install project dependencies
-into the system interpreter:
+Use Python 3.12+ (3.12 target). Create a project-local environment:
 
 ```powershell
 python -m venv backend\.venv
@@ -11,15 +9,22 @@ python -m venv backend\.venv
 & backend\.venv\Scripts\python.exe -m uvicorn app.main:app --app-dir backend --reload
 ```
 
-For UI development run `npm install` and `npm run dev` from `frontend`.
-Run `npm run build` there for TypeScript and production-build validation.
+On macOS/Linux replace the interpreter invocation with
+`backend/.venv/bin/python`. In `frontend`, run `npm ci`, `npm run dev` and
+`npm run build`. The Vite dev server proxies `/api` to `localhost:8000`.
 
-Set `ZANE_MODEL_PROVIDER=openai` and `OPENAI_API_KEY` in a local `.env` only
-to classify ambiguous domains via LangChain. The offline default returns an
-explicit clarification when neither (or both) domains can be selected.
-If starting the server outside the repository root, set an absolute
-`ZANE_DATABASE_PATH`. No Google integration or send capability exists.
+Model-free demo requires no `.env`; copy `.env.example` for a custom database
+or optional Ollama/OpenAI provider. For Ollama, run it independently and set
+`ZANE_MODEL_PROVIDER=ollama`, `ZANE_OLLAMA_BASE_URL`, and
+`ZANE_OLLAMA_MODEL` to a model already installed locally. ZANE does not start
+the service or pull models. If starting outside the repo root, set an
+absolute `ZANE_DATABASE_PATH`.
 
-Test with `POST /api/tasks` (`{"message":"Summarize HenHacks sponsorship status"}`),
-inspect `GET /api/tasks/{id}`, and use `POST /api/tasks/{id}/decision`
-(`{"approved":true}` or `{"approved":false}`) for a pending mutation.
+API highlights: `POST /api/tasks` with `{"message":"..."}`;
+`GET /api/tasks/{id}`; `POST /api/tasks/{id}/clarify` with
+`{"answer":"Northstar Labs"}`; `POST /api/tasks/{id}/decision` with
+`{"approved":true}`; `GET /api/artifacts`,
+`GET /api/artifacts/{id}`, `GET /api/artifacts/{id}/export`;
+`GET /api/capabilities`; `POST /api/demo/reset` with
+`{"confirmation":"RESET DEMO DATA"}`. Reset irreversibly clears the local
+demo database before reseeding, not source fixtures.

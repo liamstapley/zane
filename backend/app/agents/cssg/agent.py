@@ -1,14 +1,17 @@
 from collections.abc import Callable
 
 from app.memory.store import ScopedMemory
+from app.models.provider import ModelProvider
 from app.schemas.agent import AgentManifest
 from app.services.runtime import AgentResult, EventSink, MutationProposal, load_skill
+from app.services.prose import polish
 from app.tools.registry import BoundTools
 
 
 class CSSGRuntime:
-    def __init__(self, manifest: AgentManifest):
+    def __init__(self, manifest: AgentManifest, provider: ModelProvider | None = None):
         self.manifest = manifest
+        self.provider = provider
 
     def run(
         self,
@@ -31,7 +34,7 @@ class CSSGRuntime:
         else:
             return AgentResult("Which CS+Social Good task: minutes, agenda, actions, project status, or Discord draft?", clarification=True)
 
-        load_skill(self.manifest, skill)
+        instructions = load_skill(self.manifest, skill)
         emit("cssg", "skill_loaded", None, skill, "active", f"Loaded {skill} only.")
         tools = tools_for_skill(skill)
         previous = tools.read("read_previous_meeting_minutes").data if skill in {"meeting_minutes", "meeting_agenda"} else []
@@ -40,15 +43,14 @@ class CSSGRuntime:
         projects = "; ".join(f"{item['project']}: {item['status']} ({item['detail']})" for item in updates)
         next_actions = "; ".join(f"{item['owner']}: {item['task']} (due {item['due']})" for item in actions)
         if skill == "project_status_summary":
-            return AgentResult(f"Projects: {projects}. Next actions: {next_actions}.", skill)
+            draft = f"Projects: {projects}. Next actions: {next_actions}."
+            return AgentResult(polish(self.provider, "cssg", skill, instructions, projects, draft, emit), skill)
         if skill == "action_item_tracking":
             return AgentResult(f"Action items: {next_actions}. Project context: {projects}.", skill)
         if skill == "meeting_agenda":
-            return AgentResult(
-                f"Proposed agenda: Review prior meeting ({previous[-1]['notes']}); "
-                f"project updates ({projects}); action items ({next_actions}).",
-                skill,
-            )
+            draft = (f"Proposed agenda: Review prior meeting ({previous[-1]['notes']}); "
+                     f"project updates ({projects}); action items ({next_actions}).")
+            return AgentResult(polish(self.provider, "cssg", skill, instructions, projects, draft, emit), skill)
         if skill == "meeting_minutes":
             content = f"Meeting minutes draft\nPrior context: {previous[-1]['notes']}\nProject updates: {projects}\nAction items: {next_actions}"
             tool = "write_meeting_minutes"
@@ -57,5 +59,6 @@ class CSSGRuntime:
             content = f"Team check-in draft: Project updates: {projects}. Action items: {next_actions}."
             tool = "create_discord_message_draft"
             summary = "Create an unposted Discord check-in draft."
+        content = polish(self.provider, "cssg", skill, instructions, projects, content, emit)
         args = tools.propose(tool, {"content": content})
         return AgentResult(f"Prepared {skill.replace('_', ' ')} for review.", skill, MutationProposal(tool, args, summary))

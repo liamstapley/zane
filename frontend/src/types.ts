@@ -1,5 +1,6 @@
-export type TaskStatus =
+﻿export type TaskStatus =
   | "PROPOSED"
+  | "AWAITING_CLARIFICATION"
   | "AWAITING_APPROVAL"
   | "APPROVED"
   | "EXECUTING"
@@ -23,6 +24,11 @@ export interface Proposal {
   summary: string;
 }
 
+export interface ClarificationEntry {
+  question: string;
+  answer: string | null;
+}
+
 export interface Task {
   id: string;
   message: string;
@@ -32,4 +38,37 @@ export interface Task {
   result: string | null;
   events: TaskEvent[];
   proposal: Proposal | null;
+  clarification_history: ClarificationEntry[];
+  artifact_ids: string[];
+}
+
+export interface ArtifactSummary {
+  id: string;
+  task_id: string;
+  agent: string;
+  artifact_type: string;
+  title: string;
+  created_at: string;
+  updated_at: string;
+  status: string;
+  metadata: Record<string, string>;
+}
+
+export interface Artifact extends ArtifactSummary {
+  content: string;
+}
+
+export interface ArtifactExport {
+  filename: string;
+  blob: Blob;
+}
+
+export interface AgentCapability {
+  name: string;
+  description: string;
+  responsibilities: string[];
+  allowed_tools: string[];
+  allowed_skills: string[];
+  memory_namespace: string;
+  prohibited_capabilities?: string[];
 }

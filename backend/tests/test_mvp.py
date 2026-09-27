@@ -118,8 +118,8 @@ def test_each_skill_executes_with_trace(service, message, skill, status):
 
 
 def test_clarification_and_memory_isolation(service):
-    assert service.create("Hi").status == TaskStatus.FAILED
-    assert service.create("Summarize HenHacks and CS+Social Good").status == TaskStatus.FAILED
+    assert service.create("Hi").status == TaskStatus.AWAITING_CLARIFICATION
+    assert service.create("Summarize HenHacks and CS+Social Good").status == TaskStatus.AWAITING_CLARIFICATION
     hen = ScopedMemory(service.database, "henhacks")
     cssg = ScopedMemory(service.database, "cssg")
     hen.put("note", {"value": "sponsor detail"})

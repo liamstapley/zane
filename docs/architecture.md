@@ -1,29 +1,32 @@
-# MVP architecture
+# ZANE architecture
 
-The orchestrator receives only compact domain capability descriptions.
-Deterministic routing handles clear requests; a generic `ModelProvider`
-interface optionally classifies unclear ones through the OpenAI adapter.
-Without a clear selection, the API returns a failed task with a clarification
-message. A bounded LangGraph invokes one `AgentRuntime` and returns the result.
-No recursive delegation or universal toolset exists. A domain runtime may
-later be replaced with a Deep Agent implementation behind the same interface.
+The orchestrator sees only compact capability descriptions and routes exactly
+one selected agent. LangGraph makes the route/delegate path explicit; each
+domain implements the replaceable `AgentRuntime` interface. The validated
+manifests supply exact skill/tool allowlists and memory namespaces. The
+registry checks each call and approved mutation again. No agent has send
+tools or access to another domain's memory/toolset.
 
-Each validated manifest lists its tools, skills, memory namespace, and
-prohibitions. The canonical registry validates ownership and skill permissions
-on every invocation and again on approval. Only one trusted local skill
-document is loaded for a task. Emails and project documents are untrusted
-tool output and cannot alter instructions. The orchestrator never receives
-domain tools or memory; scoped memory keys are partitioned by namespace.
+Deterministic intent selection loads exactly one local skill document. Fixture
+text, clarification answers, and model responses are untrusted data, not
+instructions. An optional provider-neutral model boundary supports compact
+domain classification and task-scoped prose. The thin Ollama adapter uses a
+local Ollama instance started separately by the user; OpenAI is a separate
+optional adapter. Neither model chooses tools, approvals, eligibility or
+state transitions. Failed model calls fall back to deterministic generation.
 
-SQLite stores tasks, events, approvals, structured memory and mutable mock
-records. Immutable JSON fixtures seed missing records on startup but are never
-modified or reapplied over existing records. Read-only operations run
-automatically. Mutations follow `PROPOSED -> AWAITING_APPROVAL -> APPROVED ->
-EXECUTING -> COMPLETED/FAILED`, or `AWAITING_APPROVAL -> REJECTED`.
-Approval decisions claim a task once and recheck stored tool permissions;
-the client supplies only the decision, never tool parameters. Trace events
-contain safe summaries rather than private document text or hidden reasoning.
+SQLite persists task statuses, event summaries, clarification question/answer
+turns, approved proposal parameters, mutable demo records, scoped structured
+memory, and local task-linked artifacts. `POST /api/tasks/{id}/clarify` resumes
+the original task ID and preserves its selected domain across short answers.
+Approved document writes and artifact creation happen in one SQLite write
+transaction. Unique task linkage prevents duplicate artifacts on replay.
+Read-only agendas/summaries also become artifacts on completion. The artifact
+API provides list, detail, and Markdown download. No private source body is
+placed in the trace.
 
-This local single-user MVP is not an authenticated remote service. Do not
-expose it publicly. External providers, access control, and production-grade
-distributed execution/idempotency are future work.
+Demo reset requires both client confirmation and the explicit server token
+`RESET DEMO DATA`. It clears tasks, events, artifacts, memory and mutable
+records, then reseeds SQLite from immutable JSON. Active execution is not
+reset. The app assumes one local user; remote deployment requires auth and
+stronger data-protection measures.

@@ -11,6 +11,8 @@ from app.tools.registry import BoundTools
 
 class GraphState(TypedDict, total=False):
     message: str
+    routing_message: str
+    pinned_agent: str | None
     agent: str | None
     outcome: AgentResult
     emit: EventSink
@@ -25,7 +27,13 @@ def build_graph(
     graph = StateGraph(GraphState)
 
     def route(state: GraphState) -> GraphState:
-        agent = router.select(state["message"])
+        agent = state.get("pinned_agent") or router.select(
+            state.get("routing_message", state["message"]),
+            lambda: state["emit"](None, "model_fallback", None, None, "fallback",
+                                  "Model routing unavailable; clarification required."),
+        )
+        if agent is not None and agent not in runtimes:
+            raise ValueError("Selected agent is not registered")
         state["emit"](agent, "routing", None, None, "selected" if agent else "clarification", f"Selected {agent}." if agent else "Request needs a domain clarification.")
         if agent is None:
             return {"agent": None, "outcome": AgentResult("Is this for HenHacks sponsorship or CS+Social Good?", clarification=True)}
